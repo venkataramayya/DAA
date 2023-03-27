@@ -1,0 +1,391 @@
+
+ For any tree in the list with root node t, t = it represents the weight that gives the
+length of the merged file.
+ There are two functions least (list) and insert (list, t) in a function tree.
+ Least (list) obtains a tree in lists whose root has the least weight and return a
+pointer to this tree.
+ This tree is deleted from the list.
+ Function insert (list, t) inserts the tree with root t into the list.
+ The main for loop in this algorithm is executed in n-1 times.
+ If the list is kept in increasing order according to the weight value in the roots,
+then least (list) needs only O(1) time and insert (list, t) can be performed in O(n)
+time. Hence, the total time taken is O (n2).
+ If the list is represented as a minheap in which the root value is less than or equal
+to the values of its children, then least (list) and insert (list, t) can be done in O
+(log n) time. In this condition, the computing time for the tree is O (n log n).
+Example:
+Sample implementation
+//programme to generate optimal merge patterns
+#include <stdio.h>
+#include <stdlib.h>
+int ops;
+struct node
+{
+int weight;
+struct node *left,*right;
+};
+//min heap for storing nodes
+struct heapn
+{
+int size;
+int capacity;
+struct node** array;
+};
+//function to crete new node
+struct node* newnode(int weight)
+{
+struct node* temp = (struct node*)malloc(
+sizeof(struct node));
+temp->left = temp->right = NULL;
+temp->weight = weight;
+return temp;
+}
+// function to create a minimum heap
+struct heapn* createminheap(int capacity)
+{
+struct heapn* minheap= (struct heapn*)malloc(sizeof(struct heapn));
+minheap->size = 0;
+minheap->capacity = capacity;
+minheap->array = (struct node**)malloc(
+minheap->capacity * sizeof(struct node*));
+return minheap;
+}
+void swapnode(struct node** n1,struct node** n2)
+{
+struct node *t=*n1;
+*n1=*n2;
+*n2=t;
+}
+//function to heapify
+void heapify(struct heapn* minheap, int idx)
+{
+int min=idx;
+int left=2*idx+1;
+int right=2* idx+ 2;
+if (left<minheap->size&&minheap->array[left]->weight
+< minheap->array[min]->weight)
+min=left;
+if (right<minheap->size
+&& minheap->array[right]->weight
+< minheap->array[min]->weight)
+min=right;
+if (min!=idx) {
+swapnode(&minheap->array[min],
+&minheap->array[idx]);
+heapify(minheap,min);
+}
+}
+//extract minimum node
+struct node* extractmin(struct heapn* minheap)
+{
+struct node* temp = minheap->array[0];
+minheap->array[0] = minheap->array[minheap->size - 1];
+--minheap->size;
+heapify(minheap,0);
+return temp;
+}
+// insert new node to Min Heap
+void insert(struct heapn* minheap,struct node* minh)
+{
+++minheap->size;
+int i=minheap->size-1;
+while (i&&minh->weight< minheap->array[(i-1)/2]->weight)
+{
+minheap->array[i]=minheap->array[(i-1)/2];
+i=(i-1)/2;
+}
+minheap->array[i]=minh;
+}
+//function to initialize heap
+void buildheap(struct heapn* minheap)
+{
+int n=minheap->size-1;
+int i;
+for(i=(n-1)/2;i>=0;--i)
+heapify(minheap,i);
+}
+// Creates a min heap of capacity
+struct heapn* create(int d[],int size)
+{
+struct heapn* minheap=createminheap(size);
+for(int i=0;i<size;++i)
+minheap->array[i]=newnode(d[i]);
+minheap->size=size;
+buildheap(minheap);
+return minheap;
+}
+// The main function that builds Huffman tree
+struct node* optt(int d[],int size)
+{
+struct node *left,*right,*top;
+struct heapn* minheap= create(d,size);
+int i=0,t,tot=0;
+printf("\n");
+while (!(minheap->size==1))
+{
+left=extractmin(minheap);
+right=extractmin(minheap);
+t=left->weight+right->weight;
+tot=tot+t;
+printf("\n merge %d and %d cost is =%d",left->weight,right->weight,t);
+top=newnode(left->weight+right->weight);
+top->left=left;
+top->right=right;
+insert(minheap,top);
+}
+printf("\n total merge cost is...:%d",tot);
+return extractmin(minheap);
+}
+void main()
+{
+int fr[10],n,i;
+printf("\n Enter the no of files:");
+scanf("%d",&n);
+printf("enter the records of %d file",n);
+for(i=0;i<n;i++)
+scanf("\n %d",&fr[i]);
+struct node* root=optt(fr,n);
+}
+Output:
+Enter the no of files:4
+enter the records of 4 file20
+10
+15
+5
+merge 5 and 10 cost is =15
+merge 15 and 15 cost is =30
+merge 20 and 30 cost is =50
+total merge cost is...:95
+Experiment 4:
+***Write a program for Single Source Shortest Path for General Weights using
+Dynamic Programming***
+ Bellman Ford algorithm helps to find the shortest path from a vertex to all other
+vertices of a weighted graph.
+ Bellman Ford algorithm works by overestimating the length of the path from the
+starting vertex to all other vertices. Then it iteratively relaxes those estimates by
+finding new paths that are shorter than the previously overestimated paths.
+Procedure:
+ Maintain the path distance of every vertex. We can store that in an array of size v,
+where v is the number of vertices.
+ We also want to be able to get the shortest path, not only know the length of the
+shortest path. For this, we map each vertex to the vertex that last updated its path
+length.
+ Once the algorithm is over, we can backtrack from the destination vertex to the
+source vertex to find the path.
+Algorithm:
+Algorithm bellmanFord(G,S)
+for each vertex V in G
+distance[V] <- infinite
+previous[V] <- NULL
+distance[S] <- 0
+for each vertex V in G
+for each edge (U,V) in G
+tempDistance <- distance[U] + edge_weight(U, V)
+if tempDistance < distance[V]
+distance[V] <- tempDistance
+previous[V] <- U
+for each edge (U,V) in G
+If distance[U] + edge_weight(U, V) < distance[V}
+Error: Negative Cycle Exists
+return distance[], previous[]
+Sample implementation:
+#include <stdio.h>
+#include <stdlib.h>
+#define INF 9999
+struct edge
+{
+int u;
+int v;
+int w;
+};
+struct graph
+{
+int vertices;
+int edges;
+struct edge *edge;
+};
+void bellmanford(struct graph *g, int source);
+void display(int arr[], int size);
+int main(void)
+{
+int v,e,i;
+//create graph
+struct graph *g = (struct graph *)malloc(sizeof(struct graph));
+printf("\n enter the total vertices and edges:");
+scanf("%d%d",&v,&e);
+g->vertices=v;
+g->edges=e;
+g->edge=(struct edge *)malloc(g->edges*sizeof(struct edge));
+printf("\n enter edge u,v and weight w..:");
+for(i=0;i<e;i++)
+{
+scanf("%d%d%d",&g->edge[i].u,&g->edge[i].v,&g->edge[i].w);
+}
+bellmanford(g,0);
+return 0;
+}
+void bellmanford(struct graph *g, int source)
+{
+int i, j, u, v, w;
+int ve = g->vertices; //total no of vertices
+int ee = g->edges; // total no of edges
+int d[ve];
+int p[ve]; //predecessor array
+//initialize distance and predessor array
+for(i=0;i<ve;i++)
+{
+d[i]=INF;
+p[i]=0;
+}
+d[source] = 0;
+for(i=1; i<=ve-1;i++) // relax edges
+{
+for(j=0;j<ee;j++)
+{
+u=g->edge[j].u;
+v=g->edge[j].v;
+w=g->edge[j].w;
+if(d[u]!=INF&&d[v]>d[u]+w)
+{
+d[v]=d[u]+w;
+p[v]=u;
+}
+}
+}
+for(i=0;i<ee;i++) // check for negative cycle
+{
+u=g->edge[i].u;
+v=g->edge[i].v;
+w=g->edge[i].w;
+if (d[u]!=INF&&d[v]>d[u]+w)
+{
+printf("\n Negative Cycle...:");
+return;
+}
+}
+printf("distance array: ");
+display(d,ve);
+printf("predecessor array: ");
+display(p,ve);
+}
+void display(int arr[], int size)
+{
+int i;
+for(i=0;i<size;i++)
+{
+printf("\n %d",arr[i]);
+}
+printf("\n");
+}
+Ouput:
+enter the total vertices and edges:7
+10
+enter edge u,v and weight w..:0 1 6
+0 2 5
+0 3 5
+1 4 -1
+2 1 -2
+3 2 -2
+2 4 1
+3 5 -1
+4 6 3
+5 6 3
+distance array:
+0 1 3 5 0 4 3
+predecessor array:
+0 2 3 0 1 3 4
+Experiment 5:
+***Write a program to find all pair shortest path from any node to any other node
+within a graph***
+ Floyd-Warshall Algorithm is an algorithm for finding the shortest path between
+all the pairs of vertices in a weighted graph.
+ This algorithm works for both the directed and undirected weighted graphs.
+ It does not work for the graphs with negative cycles (where the sum of the edges
+in a cycle is negative).
+ This algorithm follows the dynamic programming approach to find the shortest
+paths.
+Algorithm:
+Algorithm Floydwarshal()
+{
+//Initialize the cost matrix
+for i := 1 to N
+for j := 1 to N
+if there is an edge from i to j
+dist[0][i][j]:= the length of the edge from i to j
+else
+dist[0][i][j] := INFINITY
+for k:= 1 to N
+for I:= 1 to N
+for j:= 1 to N
+dist[k][i][j]:= min(dist[k-1][i][j], dist[k-1][i][k] + dist[k-1][k][j])
+}
+ Initialize the cost matrix same as the input graph matrix.
+ update the solution matrix by considering all vertices as an intermediate vertex.
+ consider vertex k as an intermediate vertex.
+ For every pair (i, j) of the source and destination vertices respectively.
+1) k is not an intermediate vertex in shortest path from i to j. no change in the value
+of dist[i][j].
+2) k is an intermediate vertex in shortest path from i to j.
+Update the value of dist[i][j] as
+dist[k][i][j]:= min(dist[k-1][i][j], dist[k-1][i][k] + dist[k-1][k][j])
+Sample implementation:
+#include<stdio.h>
+#include<conio.h>
+int min(int,int);
+void floyds(int c[10][10],int n)
+{
+int i,j,k;
+for (k=1;k<=n;k++)
+for (i=1;i<=n;i++)
+for (j=1;j<=n;j++)
+if(i==j)
+c[i][j]=0;
+else
+c[i][j]=min(c[i][j],c[i][k]+c[k][j]);
+}
+int min(int a,int b)
+{
+if(a<b)
+return a;
+else
+return b;
+}
+void main()
+{
+int c[10][10],w,n,e,u,v,i,j;
+printf("\n enter the number of vertices:");
+scanf("%d",&n);
+printf("\n enter the number of edges:\n");
+scanf("%d",&e);
+for (i=1;i<=n;i++)
+{
+for (j=1;j<=n;j++)
+c[i][j]=999;
+}
+printf("\n enter the edge,weight for %d edges \n",e);
+for (i=1;i<=e;i++)
+{
+scanf("%d%d%d",&u,&v,&w);
+c[u][v]=w;
+}
+printf("\n Matrix of input data:\n");
+for (i=1;i<=n;i++)
+{
+for (j=1;j<=n;j++)
+printf("%d \t",c[i][j]);
+printf("\n");
+}
+floyds(c,n);
+printf("\n cost matrix:\n");
+for (i=1;i<=n;i++)
+{
+for (j=1;j<=n;j++)
+printf("%d \t",c[i][j]);
+printf("\n");
+}
+printf("\n shortest paths are:\n");
+for (i=1;i<=n;i++)
+for (j=1;j<=n;j++)
+{
+if(i!=j)
+printf("\nshortest path from %d to %d is %d",i,j,c[i][j]);
